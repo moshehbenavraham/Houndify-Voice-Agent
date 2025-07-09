@@ -1,0 +1,197 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 800px;
+    width: 90%;
+    margin: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #333;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+header p {
+    color: #666;
+    font-size: 1.2em;
+}
+
+.input-section {
+    margin-bottom: 30px;
+}
+
+.text-input {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.text-input input {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.text-input input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.text-input button {
+    padding: 15px 30px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.text-input button:hover {
+    background: #5a6fd8;
+}
+
+.voice-input {
+    text-align: center;
+}
+
+.voice-btn {
+    background: #764ba2;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 20px 40px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+}
+
+.voice-btn:hover {
+    background: #6a4190;
+    transform: translateY(-2px);
+}
+
+.voice-btn.recording {
+    background: #e74c3c;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.mic-icon {
+    font-size: 20px;
+}
+
+.response-section {
+    margin-top: 30px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.response {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.response h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.error {
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    color: #c62828;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.error h3 {
+    margin-bottom: 15px;
+}
+
+.hidden {
+    display: none;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .text-input {
+        flex-direction: column;
+    }
+    
+    .text-input input {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}

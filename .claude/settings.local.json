@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npm outdated)",
+      "Bash(npm audit:*)",
+      "Bash(npm view:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npm start)",
+      "WebFetch(domain:github.com)"
+    ],
+    "deny": []
+  }
+}

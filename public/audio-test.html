@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recording Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 3px;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Audio Recording Test Page</h1>
+    
+    <div class="test-section">
+        <h2>1. Browser Compatibility Check</h2>
+        <button onclick="checkBrowserSupport()">Check Browser Support</button>
+        <div id="browserStatus" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Microphone Permission Test</h2>
+        <button onclick="testMicrophonePermission()">Test Microphone Access</button>
+        <div id="micStatus" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Audio Context Test</h2>
+        <button onclick="testAudioContext()">Test Audio Context</button>
+        <div id="audioContextStatus" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Simple Recording Test</h2>
+        <button onclick="startSimpleRecording()" id="simpleRecordBtn">Start Recording</button>
+        <button onclick="stopSimpleRecording()" id="simpleStopBtn" disabled>Stop Recording</button>
+        <div id="simpleRecordStatus" class="status"></div>
+        <audio id="audioPlayback" controls style="display:none; margin-top: 10px;"></audio>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioContext;
+        let microphone;
+        let processor;
+
+        function log(elementId, message, type = '') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+        }
+
+        function checkBrowserSupport() {
+            const status = document.getElementById('browserStatus');
+            status.innerHTML = '';
+            
+            log('browserStatus', 'Checking browser capabilities...', 'info');
+            
+            // Check getUserMedia support
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                log('browserStatus', '✓ getUserMedia is supported', 'success');
+            } else {
+                log('browserStatus', '✗ getUserMedia is NOT supported', 'error');
+            }
+            
+            // Check Web Audio API support
+            if (window.AudioContext || window.webkitAudioContext) {
+                log('browserStatus', '✓ Web Audio API is supported', 'success');
+            } else {
+                log('browserStatus', '✗ Web Audio API is NOT supported', 'error');
+            }
+            
+            // Check MediaRecorder support
+            if (window.MediaRecorder) {
+                log('browserStatus', '✓ MediaRecorder is supported', 'success');
+            } else {
+                log('browserStatus', '✗ MediaRecorder is NOT supported', 'error');
+            }
+            
+            // Browser info
+            log('browserStatus', `User Agent: ${navigator.userAgent}`, 'info');
+        }
+
+        async function testMicrophonePermission() {
+            const status = document.getElementById('micStatus');
+            status.innerHTML = '';
+            
+            try {
+                log('micStatus', 'Requesting microphone permission...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 16000
+                    } 
+                });
+                
+                log('micStatus', '✓ Microphone permission granted', 'success');
+                log('micStatus', `Audio tracks: ${stream.getAudioTracks().length}`, 'info');
+                
+                const audioTrack = stream.getAudioTracks()[0];
+                const settings = audioTrack.getSettings();
+                log('micStatus', `Sample rate: ${settings.sampleRate || 'Not available'}`, 'info');
+                log('micStatus', `Channel count: ${settings.channelCount || 'Not available'}`, 'info');
+                log('micStatus', `Echo cancellation: ${settings.echoCancellation}`, 'info');
+                log('micStatus', `Noise suppression: ${settings.noiseSuppression}`, 'info');
+                
+                // Stop the stream
+                stream.getTracks().forEach(track => track.stop());
+                log('micStatus', 'Stream stopped', 'info');
+                
+            } catch (error) {
+                log('micStatus', `✗ Error: ${error.name} - ${error.message}`, 'error');
+            }
+        }
+
+        function testAudioContext() {
+            const status = document.getElementById('audioContextStatus');
+            status.innerHTML = '';
+            
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContextClass();
+                
+                log('audioContextStatus', '✓ AudioContext created successfully', 'success');
+                log('audioContextStatus', `Sample rate: ${audioContext.sampleRate} Hz`, 'info');
+                log('audioContextStatus', `State: ${audioContext.state}`, 'info');
+                log('audioContextStatus', `Base latency: ${audioContext.baseLatency || 'Not available'}`, 'info');
+                log('audioContextStatus', `Output latency: ${audioContext.outputLatency || 'Not available'}`, 'info');
+                
+                // Test if we can create necessary nodes
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    const analyser = audioContext.createAnalyser();
+                    const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+                    
+                    log('audioContextStatus', '✓ All audio nodes created successfully', 'success');
+                } catch (nodeError) {
+                    log('audioContextStatus', `✗ Error creating audio nodes: ${nodeError.message}`, 'error');
+                }
+                
+            } catch (error) {
+                log('audioContextStatus', `✗ Error creating AudioContext: ${error.message}`, 'error');
+            }
+        }
+
+        async function startSimpleRecording() {
+            const status = document.getElementById('simpleRecordStatus');
+            status.innerHTML = '';
+            audioChunks = [];
+            
+            try {
+                log('simpleRecordStatus', 'Starting recording...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        sampleRate: 16000,
+                        channelCount: 1,
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    } 
+                });
+                
+                // Create MediaRecorder
+                const options = {
+                    mimeType: 'audio/webm'
+                };
+                
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    options.mimeType = 'audio/webm;codecs=opus';
+                } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                    options.mimeType = 'audio/webm';
+                } else {
+                    log('simpleRecordStatus', 'Warning: webm not supported, using default', 'error');
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, options);
+                log('simpleRecordStatus', `✓ MediaRecorder created with ${options.mimeType}`, 'success');
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                        log('simpleRecordStatus', `Data received: ${event.data.size} bytes`, 'info');
+                    }
+                };
+                
+                mediaRecorder.onstart = () => {
+                    log('simpleRecordStatus', '✓ Recording started', 'success');
+                    document.getElementById('simpleRecordBtn').disabled = true;
+                    document.getElementById('simpleStopBtn').disabled = false;
+                };
+                
+                mediaRecorder.onstop = () => {
+                    log('simpleRecordStatus', '✓ Recording stopped', 'success');
+                    
+                    // Create blob and play it back
+                    const audioBlob = new Blob(audioChunks, { type: options.mimeType });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = document.getElementById('audioPlayback');
+                    audio.src = audioUrl;
+                    audio.style.display = 'block';
+                    
+                    log('simpleRecordStatus', `Total audio size: ${audioBlob.size} bytes`, 'info');
+                };
+                
+                mediaRecorder.start(1000); // Collect data every second
+                
+                // Also test raw audio processing
+                testRawAudioProcessing(stream);
+                
+            } catch (error) {
+                log('simpleRecordStatus', `✗ Error: ${error.name} - ${error.message}`, 'error');
+            }
+        }
+
+        function testRawAudioProcessing(stream) {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                const context = new AudioContextClass({ sampleRate: 16000 });
+                
+                microphone = context.createMediaStreamSource(stream);
+                processor = context.createScriptProcessor(4096, 1, 1);
+                
+                let sampleCount = 0;
+                processor.onaudioprocess = (event) => {
+                    const inputData = event.inputBuffer.getChannelData(0);
+                    sampleCount += inputData.length;
+                    
+                    // Check if we're getting actual audio data
+                    let maxValue = 0;
+                    let minValue = 0;
+                    for (let i = 0; i < inputData.length; i++) {
+                        if (inputData[i] > maxValue) maxValue = inputData[i];
+                        if (inputData[i] < minValue) minValue = inputData[i];
+                    }
+                    
+                    if (sampleCount % (16000 * 2) === 0) { // Log every 2 seconds
+                        log('simpleRecordStatus', 
+                            `Raw audio - Samples: ${sampleCount}, Max: ${maxValue.toFixed(4)}, Min: ${minValue.toFixed(4)}`, 
+                            'info');
+                    }
+                };
+                
+                microphone.connect(processor);
+                processor.connect(context.destination);
+                
+                log('simpleRecordStatus', `✓ Raw audio processing started at ${context.sampleRate} Hz`, 'success');
+                
+            } catch (error) {
+                log('simpleRecordStatus', `✗ Raw audio processing error: ${error.message}`, 'error');
+            }
+        }
+
+        function stopSimpleRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                
+                document.getElementById('simpleRecordBtn').disabled = false;
+                document.getElementById('simpleStopBtn').disabled = true;
+            }
+            
+            if (processor) {
+                processor.disconnect();
+                microphone.disconnect();
+            }
+        }
+    </script>
+</body>
+</html>

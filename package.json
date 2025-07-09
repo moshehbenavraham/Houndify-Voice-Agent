@@ -1,0 +1,40 @@
+{
+  "name": "houndify-voice-agent",
+  "version": "1.0.0",
+  "description": "A voice and text query application using the Houndify SDK",
+  "main": "src/server/server.js",
+  "scripts": {
+    "start": "node src/server/server.js",
+    "dev": "nodemon src/server/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "prestart": "node -e \"require('dotenv').config(); if (!process.env.HOUNDIFY_CLIENT_ID) { console.error('Missing .env file. Copy .env.example to .env and add your credentials.'); process.exit(1); }\""
+  },
+  "keywords": ["houndify", "voice", "speech-recognition", "natural-language"],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.1.0",
+    "houndify": "^3.1.14"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5",
+    "supertest": "^6.3.4"
+  }
+}

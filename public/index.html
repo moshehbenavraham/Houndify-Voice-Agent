@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Houndify Voice Agent</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://unpkg.com/houndify@3.1.14/dist/houndify.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Houndify Voice Agent</h1>
+            <p>Ask me anything using text or voice!</p>
+        </header>
+
+        <main>
+            <div class="input-section">
+                <div class="text-input">
+                    <input type="text" id="textQuery" placeholder="Type your query here..." />
+                    <button id="sendTextBtn">Send</button>
+                </div>
+
+                <div class="voice-input">
+                    <button id="voiceBtn" class="voice-btn">
+                        <span class="mic-icon">🎤</span>
+                        <span class="btn-text">Click to speak</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="response-section">
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Processing your request...</p>
+                </div>
+
+                <div id="response" class="response hidden">
+                    <h3>Response:</h3>
+                    <div id="responseContent"></div>
+                </div>
+
+                <div id="error" class="error hidden">
+                    <h3>Error:</h3>
+                    <div id="errorContent"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by Houndify API</p>
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
