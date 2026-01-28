@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
 const requiredEnvVars = ['HOUNDIFY_CLIENT_ID', 'HOUNDIFY_CLIENT_KEY'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
-if (missingEnvVars.length > 0) {
+if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
   console.error('ERROR: Missing required environment variables:', missingEnvVars.join(', '));
   console.error('Please copy .env.example to .env and fill in your Houndify credentials.');
   process.exit(1);

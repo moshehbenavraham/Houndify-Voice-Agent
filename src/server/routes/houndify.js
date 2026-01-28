@@ -16,13 +16,14 @@ function handleTextQuery(req, res) {
   // The textProxyHandler expects this to be in req.body as a string
   // Get the Hound-Request-Info header if it exists
   const requestInfo = req.headers['hound-request-info'] || req.get('Hound-Request-Info');
-  
+
+  if (!requestInfo) {
+    return res.status(400).json({ error: 'Missing Hound-Request-Info header' });
+  }
+
   // Set the body to the request info string
-  req.body = requestInfo || '';
-  
-  console.log('Headers:', req.headers);
-  console.log('Body set to:', req.body);
-  
+  req.body = requestInfo;
+
   // Now call the proxy handler
   textProxyHandler(req, res);
 }
